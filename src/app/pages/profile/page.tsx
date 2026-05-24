@@ -1,6 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/app/lib/supabase"
 import Navbar from "@/app/components/navbar/navbar"
 import ProfileHeader from "@/app/pages/profile/partials/profile-header"
 import StatsCards from "@/app/pages/profile/partials/stats"
@@ -11,12 +12,25 @@ import QuizzesTab from "@/app/pages/profile/partials/quizzes"
 import AchievementsTab from "@/app/pages/profile/partials/achivement"
 import SettingsTab from "@/app/pages/profile/partials/setting"
 import { FaChartBar, FaGraduationCap, FaBookmark, FaTrophy, FaStar, FaCog } from "react-icons/fa"
-import type { User, Course, Quiz, Achievement, ProfileStats } from "@/app/types/profile"
+import type { Course, Quiz, Achievement, ProfileStats } from "@/app/types/profile"
+
+// ✅ Definisikan User interface langsung di sini dengan field 'id'
+interface User {
+  id: string
+  name: string
+  email: string
+  bio: string
+  location: string
+  website: string
+  joinDate: string
+  lastActive: string
+}
 
 const ProfilePage = () => {
   const [user, setUser] = useState<User | null>(null)
   const [activeTab, setActiveTab] = useState("overview")
   const [isEditing, setIsEditing] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [editForm, setEditForm] = useState({
     name: "",
     bio: "",
@@ -25,7 +39,6 @@ const ProfilePage = () => {
   })
   const router = useRouter()
 
-  // Mock data - in real app, this would come from API
   const [enrolledCourses] = useState<Course[]>([
     {
       id: "1",
@@ -125,74 +138,86 @@ const ProfilePage = () => {
   ])
 
   useEffect(() => {
-    // Check if user is logged in
-    const storedUser = localStorage.getItem("user")
-    if (storedUser) {
-      const userData = JSON.parse(storedUser)
-      setUser({
-        ...userData,
-        bio: "Passionate learner exploring the world of technology and programming.",
-        location: "Jakarta, Indonesia",
-        website: "https://github.com/username",
-        joinDate: "2023-12-01",
-        lastActive: "2024-01-20",
-      })
-      setEditForm({
-        name: userData.name,
-        bio: "Passionate learner exploring the world of technology and programming.",
-        location: "Jakarta, Indonesia",
-        website: "https://github.com/username",
-      })
-    } else {
-      router.push("/pages/login")
-    }
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
 
-    // Listen for storage changes
-    const handleStorageChange = () => {
-      const updatedUser = localStorage.getItem("user")
-      if (updatedUser) {
-        setUser(JSON.parse(updatedUser))
-      } else {
-        router.push("/pages/login")
+      if (!session) {
+        router.replace("/pages/login")
+        return
       }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username, email, bio, location, website, join_date, last_active")
+        .eq("id", session.user.id)
+        .single()
+
+      if (!error && data) {
+        // ✅ Cast eksplisit ke User agar tidak ada error 'id does not exist'
+        const userData: User = {
+          id: session.user.id,
+          name: data.username ?? "",
+          email: data.email ?? "",
+          bio: data.bio ?? "Passionate learner exploring the world of technology.",
+          location: data.location ?? "",
+          website: data.website ?? "",
+          joinDate: data.join_date ?? "",
+          lastActive: data.last_active ?? "",
+        }
+        setUser(userData)
+        setEditForm({
+          name: userData.name,
+          bio: userData.bio,
+          location: userData.location,
+          website: userData.website,
+        })
+      }
+
+      setIsLoading(false)
     }
 
-    window.addEventListener("storage", handleStorageChange)
-    return () => window.removeEventListener("storage", handleStorageChange)
+    checkAuth()
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) router.replace("/pages/login")
+    })
+
+    return () => subscription.unsubscribe()
   }, [router])
 
-  const handleSaveProfile = () => {
-    if (user) {
-      const updatedUser = {
-        ...user,
-        name: editForm.name,
+  const handleSaveProfile = async () => {
+    if (!user) return
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        username: editForm.name,
         bio: editForm.bio,
         location: editForm.location,
         website: editForm.website,
-      }
-      setUser(updatedUser)
+      })
+      .eq("id", user.id)
 
-      // Update localStorage
-      const currentUser = JSON.parse(localStorage.getItem("user") || "{}")
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...currentUser,
+    if (!error) {
+      // ✅ Gunakan functional update agar TypeScript tidak bingung dengan tipe
+      setUser((prev) => {
+        if (!prev) return null
+        return {
+          ...prev,
           name: editForm.name,
-        }),
-      )
-
+          bio: editForm.bio,
+          location: editForm.location,
+          website: editForm.website,
+        }
+      })
       setIsEditing(false)
     }
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to logout?")
-
     if (confirmLogout) {
-      localStorage.removeItem("user")
-      setUser(null)
-      window.dispatchEvent(new Event("storage"))
+      await supabase.auth.signOut()
       router.push("/pages/home")
     }
   }
@@ -201,11 +226,16 @@ const ProfilePage = () => {
     setEditForm((prev) => ({ ...prev, [field]: value }))
   }
 
+  // ✅ Tambah return type eksplisit agar tidak ada error 'must return a value'
   const calculateStats = (): ProfileStats => {
-    const completedCourses = enrolledCourses.filter((course) => course.progress === 100).length
+    const completedCourses = enrolledCourses.filter((c) => c.progress === 100).length
     const totalQuizzes = quizHistory.length
-    const averageQuizScore = quizHistory.reduce((sum, quiz) => sum + quiz.score, 0) / totalQuizzes || 0
-    const totalLearningHours = enrolledCourses.reduce((sum, course) => sum + course.progress * 2, 0) / 100
+    const averageQuizScore =
+      totalQuizzes > 0
+        ? quizHistory.reduce((sum, quiz) => sum + quiz.score, 0) / totalQuizzes
+        : 0
+    const totalLearningHours =
+      enrolledCourses.reduce((sum, course) => sum + course.progress * 2, 0) / 100
 
     return {
       completedCourses,
@@ -215,17 +245,7 @@ const ProfilePage = () => {
     }
   }
 
-  const stats = calculateStats()
-
-  const tabs = [
-    { id: "overview", label: "Overview", icon: FaChartBar },
-    { id: "courses", label: "My Courses", icon: FaGraduationCap },
-    { id: "bookmarks", label: "Bookmarks", icon: FaBookmark },
-    { id: "quizzes", label: "Quiz History", icon: FaTrophy },
-    { id: "achievements", label: "Achievements", icon: FaStar },
-    { id: "settings", label: "Settings", icon: FaCog },
-  ]
-
+  // ✅ Definisikan renderTabContent yang sebelumnya hilang
   const renderTabContent = () => {
     switch (activeTab) {
       case "overview":
@@ -245,21 +265,38 @@ const ProfilePage = () => {
     }
   }
 
-  if (!user) {
+  const stats = calculateStats()
+
+  const tabs = [
+    { id: "overview", label: "Overview", icon: FaChartBar },
+    { id: "courses", label: "My Courses", icon: FaGraduationCap },
+    { id: "bookmarks", label: "Bookmarks", icon: FaBookmark },
+    { id: "quizzes", label: "Quiz History", icon: FaTrophy },
+    { id: "achievements", label: "Achievements", icon: FaStar },
+    { id: "settings", label: "Settings", icon: FaCog },
+  ]
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p>Loading profile...</p>
+        <div className="flex gap-1.5">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="w-2 h-2 rounded-full bg-orange-400 animate-bounce"
+              style={{ animationDelay: `${i * 0.15}s` }}
+            />
+          ))}
         </div>
       </div>
     )
   }
 
+  if (!user) return null
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <ProfileHeader
           user={user}
@@ -270,10 +307,7 @@ const ProfilePage = () => {
           onStartEditing={() => setIsEditing(true)}
           onCancelEditing={() => setIsEditing(false)}
         />
-
         <StatsCards stats={stats} />
-
-        {/* Tabs */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="border-b border-gray-200">
             <nav className="flex overflow-x-auto">
@@ -293,7 +327,6 @@ const ProfilePage = () => {
               ))}
             </nav>
           </div>
-
           <div className="p-6">{renderTabContent()}</div>
         </div>
       </div>

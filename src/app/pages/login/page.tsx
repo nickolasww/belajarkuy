@@ -1,11 +1,11 @@
 "use client"
-
 import React from "react"
 import Input from "@/app/components/input/input"
 import Image from "next/image"
 import LoginImg from "@/app/assets/LoginImg.png"
 import Button from "@/app/components/button/button"
 import { useRouter } from "next/navigation"
+import { supabase } from "@/app/lib/supabase"
 
 const LoginPage = () => {
   const [email, setEmail] = React.useState("")
@@ -17,18 +17,32 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    if (!email || !password) {
+      setError("Email dan password harus diisi")
+      return
+    }
+
     setIsLoading(true)
-
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800))
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-      if (email && password) {
-        const user = { name: email.split("@")[0], email }
-        localStorage.setItem("user", JSON.stringify(user))
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          setError("Email atau password salah")
+        } else if (error.message.includes("Email not confirmed")) {
+          setError("Email belum dikonfirmasi. Cek inbox kamu.")
+        } else {
+          setError(error.message)
+        }
+        return
+      }
 
+      if (data.user) {
         router.push("/pages/home")
-      } else {
-        setError("Email dan password harus diisi")
       }
     } catch {
       setError("Terjadi kesalahan saat login")
@@ -75,6 +89,7 @@ const LoginPage = () => {
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Sign in to your account</h1>
               <p className="text-gray-600 mt-2 text-sm md:text-base">Welcome back! Please enter your details</p>
             </div>
+
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
               <div className="w-full">
                 <Input
@@ -98,15 +113,16 @@ const LoginPage = () => {
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 />
               </div>
+
               {error && (
-                <div className="w-full">
+                <div className="w-full p-3 bg-red-50 border border-red-200 rounded-lg">
                   <p className="text-red-500 text-sm">{error}</p>
                 </div>
               )}
 
               <div className="flex flex-col sm:flex-row justify-between w-full items-start sm:items-center gap-4 sm:gap-0 pt-2">
                 <label className="flex gap-2 text-gray-500 text-sm md:text-base">
-                  <input type="checkbox" name="agree" className="mt-0.5" />
+                  <input type="checkbox" name="remember" className="mt-0.5" />
                   Remember me
                 </label>
                 <Button type="submit" variant="primary" size="lg" className="w-full sm:w-auto" disabled={isLoading}>
@@ -117,15 +133,11 @@ const LoginPage = () => {
 
             <p className="mt-6 text-center text-gray-600 text-sm md:text-base">
               {"Don't have an account?"}{" "}
-              <a href="/pages/register" className="text-orange-600 hover:underline font-medium">
-                Create Account
-              </a>
+              <a href="/pages/register" className="text-orange-600 hover:underline font-medium">Create Account</a>
             </p>
-            
+
             <p className="mt-2 text-center">
-              <a href="#" className="text-orange-600 hover:underline text-sm">
-                Forgot your password?
-              </a>
+              <a href="#" className="text-orange-600 hover:underline text-sm">Forgot your password?</a>
             </p>
           </div>
         </div>
