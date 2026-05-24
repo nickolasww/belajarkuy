@@ -1,15 +1,15 @@
-import { notFound } from "next/navigation"
-import { use } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import VideoPlayer from "@/app/pages/courses/partials/vidioplayer"
-import CourseCurriculum from "@/app/pages/courses/partials/curriculumn"
-import type { CourseDetail } from "@/app/types/courses"
-import { FaArrowLeft } from "react-icons/fa6"
-import { CiStar } from "react-icons/ci"
-import { FiUsers } from "react-icons/fi"
-import { CiClock1 } from "react-icons/ci"
-import { FiBarChart } from "react-icons/fi"
+import { notFound } from "next/navigation";
+import { use } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import VideoPlayer from "@/app/pages/courses/partials/vidioplayer";
+import CourseCurriculum from "@/app/pages/courses/partials/curriculumn";
+import type { CourseDetail } from "@/app/types/courses";
+import { FaArrowLeft } from "react-icons/fa6";
+import { CiStar } from "react-icons/ci";
+import { FiUsers } from "react-icons/fi";
+import { CiClock1 } from "react-icons/ci";
+import { FiBarChart } from "react-icons/fi";
 
 // Sample course detail data - Updated with YouTube URLs
 const getCourseDetail = (id: string): CourseDetail | null => {
@@ -38,16 +38,34 @@ const getCourseDetail = (id: string): CourseDetail | null => {
           id: "module-1",
           title: "Pengenalan Next Js",
           lessons: [
-            { id: "lesson-1", title: "Apa itu Next Js?", duration: "10:30", isCompleted: true },
-            { id: "lesson-2", title: "Membuat File Baru di Next JS", duration: "8:15", isCompleted: true },
-            { id: "lesson-3", title: "Folder Structure in Next Js", duration: "15:45", isCompleted: false },
+            {
+              id: "lesson-1",
+              title: "Apa itu Next Js?",
+              duration: "10:30",
+              isCompleted: true,
+            },
+            {
+              id: "lesson-2",
+              title: "Membuat File Baru di Next JS",
+              duration: "8:15",
+              isCompleted: true,
+            },
+            {
+              id: "lesson-3",
+              title: "Folder Structure in Next Js",
+              duration: "15:45",
+              isCompleted: false,
+            },
           ],
         },
       ],
       reviews: [
         {
           id: "review-1",
-          user: { name: "Ahmad Rizki", avatar: "/placeholder.svg?height=40&width=40" },
+          user: {
+            name: "Ahmad Rizki",
+            avatar: "/placeholder.svg?height=40&width=40",
+          },
           rating: 5,
           comment:
             "Kursus yang sangat bagus! Penjelasannya mudah dipahami dan step-by-step. Sangat recommended untuk pemula yang ingin belajar Webflow.",
@@ -55,7 +73,10 @@ const getCourseDetail = (id: string): CourseDetail | null => {
         },
         {
           id: "review-2",
-          user: { name: "Siti Nurhaliza", avatar: "/placeholder.svg?height=40&width=40" },
+          user: {
+            name: "Siti Nurhaliza",
+            avatar: "/placeholder.svg?height=40&width=40",
+          },
           rating: 4,
           comment:
             "Materi lengkap dan instructor sangat berpengalaman. Hanya saja ada beberapa bagian yang agak cepat, tapi overall bagus.",
@@ -88,49 +109,83 @@ const getCourseDetail = (id: string): CourseDetail | null => {
           id: "module-1",
           title: "React Fundamentals",
           lessons: [
-            { id: "lesson-1", title: "Introduction to React", duration: "15:30", isCompleted: false },
-            { id: "lesson-2", title: "JSX and Components", duration: "20:15", isCompleted: false },
-            { id: "lesson-3", title: "Props and State", duration: "25:45", isCompleted: false },
+            {
+              id: "lesson-1",
+              title: "Introduction to React",
+              duration: "15:30",
+              isCompleted: false,
+            },
+            {
+              id: "lesson-2",
+              title: "JSX and Components",
+              duration: "20:15",
+              isCompleted: false,
+            },
+            {
+              id: "lesson-3",
+              title: "Props and State",
+              duration: "25:45",
+              isCompleted: false,
+            },
           ],
         },
         {
           id: "module-2",
           title: "Advanced React Concepts",
           lessons: [
-            { id: "lesson-4", title: "React Hooks", duration: "30:30", isCompleted: false },
-            { id: "lesson-5", title: "Context API", duration: "22:15", isCompleted: false },
-            { id: "lesson-6", title: "React Router", duration: "28:20", isCompleted: false },
+            {
+              id: "lesson-4",
+              title: "React Hooks",
+              duration: "30:30",
+              isCompleted: false,
+            },
+            {
+              id: "lesson-5",
+              title: "Context API",
+              duration: "22:15",
+              isCompleted: false,
+            },
+            {
+              id: "lesson-6",
+              title: "React Router",
+              duration: "28:20",
+              isCompleted: false,
+            },
           ],
         },
       ],
       reviews: [
         {
           id: "review-1",
-          user: { name: "Maria Garcia", avatar: "/placeholder.svg?height=40&width=40" },
+          user: {
+            name: "Maria Garcia",
+            avatar: "/placeholder.svg?height=40&width=40",
+          },
           rating: 5,
-          comment: "Excellent course! Very comprehensive and well-structured. The projects are really helpful.",
+          comment:
+            "Excellent course! Very comprehensive and well-structured. The projects are really helpful.",
           date: "3 days ago",
         },
       ],
     },
-  }
+  };
 
-  return courseDetails[id] || null
-}
+  return courseDetails[id] || null;
+};
 
 interface CourseDetailPageProps {
   params: Promise<{
-    id: string
-  }>
+    id: string;
+  }>;
 }
 
 export default function CourseDetailPage({ params }: CourseDetailPageProps) {
   // Unwrap params Promise using React.use()
-  const resolvedParams = use(params)
-  const course = getCourseDetail(resolvedParams.id)
+  const resolvedParams = use(params);
+  const course = getCourseDetail(resolvedParams.id);
 
   if (!course) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -162,11 +217,15 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
                   {course.category}
                 </span>
                 {course.isFree && (
-                  <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">GRATIS</span>
+                  <span className="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                    GRATIS
+                  </span>
                 )}
               </div>
 
-              <h1 className="text-3xl font-bold text-gray-900 mb-4">{course.title}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                {course.title}
+              </h1>
 
               <div className="flex items-center gap-6 mb-6 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
@@ -197,55 +256,34 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
                   />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{course.instructor.name}</p>
-                  <p className="text-sm text-gray-600">{course.instructor.title}</p>
+                  <p className="font-medium text-gray-900">
+                    {course.instructor.name}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {course.instructor.title}
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Course Description */}
             <div className="bg-white rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Deskripsi Kursus</h2>
-              <p className="text-gray-700 leading-relaxed">{course.description}</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                Deskripsi Kursus
+              </h2>
+              <p className="text-gray-700 leading-relaxed">
+                {course.description}
+              </p>
             </div>
 
-            {/* Course Reviews */}
-            <div className="bg-white rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Reviews ({course.reviews.length})</h2>
-              <div className="space-y-4">
-                {course.reviews.map((review) => (
-                  <div key={review.id} className="border-b border-gray-200 pb-4 last:border-b-0">
-                    <div className="flex items-start gap-3">
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                        <Image
-                          src={review.user.avatar || "/placeholder.svg"}
-                          alt={review.user.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <p className="font-medium text-gray-900">{review.user.name}</p>
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <CiStar
-                                key={i}
-                                className={`w-4 h-4 ${
-                                  i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <span className="text-sm text-gray-500">{review.date}</span>
-                        </div>
-                        <p className="text-gray-700">{review.comment}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Komunitas */}
+            <button
+             className="bg-white rounded-xl p-3 mx-auto hover:bg-gray-100 transition-colors text-sm font-medium text-gray-700 border border-gray-300">
+              <Link 
+              href={`/pages/courses/${course.id}/Komunitas`}>
+                Masuk Ke halaman Komunitas
+              </Link>
+            </button>
           </div>
 
           {/* Sidebar */}
@@ -255,7 +293,9 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
             {/* Enroll Button */}
             <div className="bg-white rounded-lg p-6 border border-gray-200">
               <button className="w-full bg-orange-500 text-white py-3 px-6 rounded-lg font-medium hover:bg-orange-600 transition-colors">
-                {course.isFree ? "Mulai Belajar Gratis" : `Daftar - $${course.price}`}
+                {course.isFree
+                  ? "Mulai Belajar Gratis"
+                  : `Daftar - $${course.price}`}
               </button>
 
               {/* Course Stats */}
@@ -283,7 +323,9 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
 
             {/* Course Features */}
             <div className="bg-white rounded-lg p-6 border border-gray-200">
-              <h3 className="font-semibold text-gray-900 mb-3">Yang Akan Anda Dapatkan:</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">
+                Yang Akan Anda Dapatkan:
+              </h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-green-500 rounded-full"></span>
@@ -311,5 +353,5 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

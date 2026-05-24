@@ -2,11 +2,12 @@
 import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import Link from "next/link"
-import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa"
+import { FaBars, FaTimes, FaUserCircle, FaBell } from "react-icons/fa"
 
 const Navbar = () => {
   const [user, setUser] = useState<{ name: string; email: string } | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isNotifOpen, setIsNotifOpen] = useState(false)
   const pathname = usePathname()
 
   useEffect(() => {
@@ -87,6 +88,37 @@ const Navbar = () => {
         <div className="hidden md:flex items-center space-x-3 lg:space-x-4">
           {user ? (
             <div className="flex items-center space-x-3 lg:space-x-4">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsNotifOpen((prev) => !prev)}
+                  className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-haspopup="menu"
+                  aria-expanded={isNotifOpen}
+                  aria-label="Notifications"
+                >
+                  <FaBell size={18} className="text-gray-700" />
+                  <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-orange-500"></span>
+                </button>
+                {isNotifOpen && (
+                  <div className="absolute right-0 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg z-50">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900">Notifikasi</p>
+                      <p className="text-xs text-gray-500">Terbaru untuk Anda</p>
+                    </div>
+                    <div className="p-3 space-y-2">
+                      <div className="rounded-md px-3 py-2 hover:bg-gray-50">
+                        <p className="text-sm text-gray-800">Kelas baru tersedia: Next.js Dasar</p>
+                        <p className="text-xs text-gray-500">2 jam yang lalu</p>
+                      </div>
+                      <div className="rounded-md px-3 py-2 hover:bg-gray-50">
+                        <p className="text-sm text-gray-800">Progress Anda mencapai 80%</p>
+                        <p className="text-xs text-gray-500">Kemarin</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
               <Link
                 href="/pages/profile"
                 className="flex items-center space-x-2 hover:text-orange-600 transition-colors"
@@ -97,6 +129,30 @@ const Navbar = () => {
             </div>
           ) : (
             <>
+            {/* Notifications for Guest Users */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsNotifOpen((prev) => !prev)}
+                  className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  aria-haspopup="menu"
+                  aria-expanded={isNotifOpen}
+                  aria-label="Notifications"
+                >
+                  <FaBell size={18} className="text-gray-700" />
+                </button>
+                {isNotifOpen && (
+                  <div className="absolute right-0 mt-2 w-64 rounded-lg border border-gray-200 bg-white shadow-lg z-50">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900">Notifikasi</p>
+                      <p className="text-xs text-gray-500">Silahkan Login untuk melihat update</p>
+                    </div>
+                    <div className="p-3">
+                      <p className="text-sm text-gray-700">Belum ada notifikasi.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
               <Link href="/pages/register">
                 <button className="px-3 py-2 lg:px-4 lg:py-2 bg-orange-100 text-orange-600 rounded-md hover:bg-orange-200 transition-colors text-sm lg:text-base">
                   Create account
@@ -116,6 +172,54 @@ const Navbar = () => {
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white shadow-md z-50 border-b border-gray-200 animate-slideDown">
           <div className="flex flex-col p-4 space-y-4">
+
+            {/* Notifications for Mobile */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsNotifOpen((prev) => !prev)}
+                className="flex w-full items-center justify-between p-3 rounded-md"
+                aria-haspopup="menu"
+                aria-expanded={isNotifOpen}
+                aria-label="Notifications"
+              >
+                <span className="text-sm font-medium text-gray-800">Notifikasi</span>
+                <FaBell size={18} className="text-gray-700" />
+              </button>
+              {isNotifOpen && (
+                <div className="mt-2 w-full rounded-lg border border-gray-200 bg-white shadow-sm">
+                  {user ? (
+                    <>
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="text-sm font-semibold text-gray-900">Notifikasi</p>
+                        <p className="text-xs text-gray-500">Terbaru untuk Anda</p>
+                      </div>
+                      <div className="p-3 space-y-2">
+                        <div className="rounded-md px-3 py-2 hover:bg-gray-50">
+                          <p className="text-sm text-gray-800">Kelas baru tersedia: Next.js Dasar</p>
+                          <p className="text-xs text-gray-500">2 jam yang lalu</p>
+                        </div>
+                        <div className="rounded-md px-3 py-2 hover:bg-gray-50">
+                          <p className="text-sm text-gray-800">Progress Anda mencapai 80%</p>
+                          <p className="text-xs text-gray-500">Kemarin</p>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="text-sm font-semibold text-gray-900">Notifikasi</p>
+                        <p className="text-xs text-gray-500">Silahkan Login untuk melihat update</p>
+                      </div>
+                      <div className="p-3">
+                        <p className="text-sm text-gray-700">Belum ada notifikasi.</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Navigation Links for Mobile */}
             {navigationLinks.map((link) => (
               <Link
