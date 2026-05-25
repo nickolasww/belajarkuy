@@ -57,6 +57,7 @@ const Navbar = () => {
   const navigationLinks = [
     { href: "/pages/home", label: "Home" },
     { href: "/pages/courses", label: "Courses" },
+    { href: "/pages/Komunitas", label: "Komunitas" },
     { href: "/pages/quiz", label: "Quiz" },
   ]
 

@@ -275,15 +275,6 @@ export default function CourseDetailPage({ params }: CourseDetailPageProps) {
                 {course.description}
               </p>
             </div>
-
-            {/* Komunitas */}
-            <button
-             className="bg-white rounded-xl p-3 mx-auto hover:bg-gray-100 transition-colors text-sm font-medium text-gray-700 border border-gray-300">
-              <Link 
-              href={`/pages/courses/${course.id}/Komunitas`}>
-                Masuk Ke halaman Komunitas
-              </Link>
-            </button>
           </div>
 
           {/* Sidebar */}
