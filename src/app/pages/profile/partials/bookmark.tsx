@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { FaHeart } from "react-icons/fa"
 import type { Course } from "@/app/types/profile"
 
@@ -17,7 +18,14 @@ export default function BookmarksTab({ bookmarkedCourses }: BookmarksTabProps) {
             key={course.id}
             className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
           >
-            <img src={course.image || "/placeholder.svg"} alt={course.title} className="w-full h-32 object-cover" />
+            <div className="relative w-full h-32">
+              <Image
+                src={course.image || "/placeholder.svg"}
+                alt={course.title}
+                fill
+                className="object-cover"
+              />
+            </div>
             <div className="p-4">
               <h4 className="font-semibold mb-2">{course.title}</h4>
               <p className="text-sm text-gray-600 mb-3">{course.category}</p>

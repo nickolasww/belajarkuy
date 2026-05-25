@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, use } from "react"
+import { useState, useEffect, use, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import QuizHeader from "@/app/pages/quiz/partials/header"
 import QuestionCard from "@/app/components/card/questioncard"
@@ -162,49 +162,7 @@ export default function QuizPage({ params }: QuizPageProps) {
     }
   }, [resolvedParams.id])
 
-  // Timer effect
-  useEffect(() => {
-    if (quiz?.timeLimit && timeRemaining > 0 && !isQuizCompleted) {
-      const timer = setInterval(() => {
-        setTimeRemaining((prev) => {
-          if (prev <= 1) {
-            handleQuizSubmit()
-            return 0
-          }
-          return prev - 1
-        })
-      }, 1000)
-
-      return () => clearInterval(timer)
-    }
-  }, [timeRemaining, isQuizCompleted, quiz?.timeLimit])
-
-  const handleAnswerSelect = (answer: number) => {
-    if (!quiz) return
-
-    setAnswers((prev) => ({
-      ...prev,
-      [quiz.questions[currentQuestionIndex].id]: answer,
-    }))
-  }
-
-  const handleNextQuestion = () => {
-    if (!quiz) return
-
-    if (currentQuestionIndex < quiz.questions.length - 1) {
-      setCurrentQuestionIndex((prev) => prev + 1)
-    } else {
-      handleQuizSubmit()
-    }
-  }
-
-  const handlePreviousQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex((prev) => prev - 1)
-    }
-  }
-
-  const handleQuizSubmit = () => {
+  const handleQuizSubmit = useCallback(() => {
     if (!quiz) return
 
     setIsQuizCompleted(true)
@@ -252,7 +210,50 @@ export default function QuizPage({ params }: QuizPageProps) {
     } catch (err) {
       console.error("Error saving quiz result:", err)
     }
+  }, [answers, quiz, quizStartTime])
+
+  // Timer effect
+  useEffect(() => {
+    if (quiz?.timeLimit && timeRemaining > 0 && !isQuizCompleted) {
+      const timer = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            handleQuizSubmit()
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+
+      return () => clearInterval(timer)
+    }
+  }, [timeRemaining, isQuizCompleted, quiz?.timeLimit, handleQuizSubmit])
+
+  const handleAnswerSelect = (answer: number) => {
+    if (!quiz) return
+
+    setAnswers((prev) => ({
+      ...prev,
+      [quiz.questions[currentQuestionIndex].id]: answer,
+    }))
   }
+
+  const handleNextQuestion = () => {
+    if (!quiz) return
+
+    if (currentQuestionIndex < quiz.questions.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1)
+    } else {
+      handleQuizSubmit()
+    }
+  }
+
+  const handlePreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prev) => prev - 1)
+    }
+  }
+
 
   const handleRetry = () => {
     setCurrentQuestionIndex(0)

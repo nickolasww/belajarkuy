@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { FaTrophy, FaGraduationCap, FaStar } from "react-icons/fa"
 import type { Course } from "@/app/types/profile"
 
@@ -40,11 +41,14 @@ export default function OverviewTab({ enrolledCourses }: OverviewTabProps) {
         <div className="space-y-4">
           {enrolledCourses.slice(0, 3).map((course) => (
             <div key={course.id} className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg">
-              <img
-                src={course.image || "/placeholder.svg"}
-                alt={course.title}
-                className="w-16 h-12 object-cover rounded"
-              />
+              <div className="relative w-16 h-12">
+                <Image
+                  src={course.image || "/placeholder.svg"}
+                  alt={course.title}
+                  fill
+                  className="object-cover rounded"
+                />
+              </div>
               <div className="flex-1">
                 <h4 className="font-medium">{course.title}</h4>
                 <p className="text-sm text-gray-600">{course.category}</p>
